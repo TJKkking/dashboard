@@ -29,6 +29,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   logsAutoRefreshTimeInterval: 5,
   resourceAutoRefreshTimeInterval: 5,
   disableAccessDeniedNotifications: false,
+  hideAllNamespaces: false,
   defaultNamespace: 'default',
   namespaceFallbackList: ['default'],
 };
@@ -38,7 +39,7 @@ export class GlobalSettingsService {
   onSettingsUpdate = new ReplaySubject<void>();
   onPageVisibilityChange = new EventEmitter<boolean>();
 
-  private readonly endpoint_ = 'api/v1/settings/global';
+  private readonly endpoint_ = 'settings';
   private settings_: GlobalSettings = DEFAULT_SETTINGS;
   private unsubscribe_ = new Subject<void>();
   private isInitialized_ = false;
@@ -128,6 +129,10 @@ export class GlobalSettingsService {
 
   getDisableAccessDeniedNotifications(): boolean {
     return this.settings_.disableAccessDeniedNotifications;
+  }
+
+  getHideAllNamespaces(): boolean {
+    return this.settings_.hideAllNamespaces;
   }
 
   getDefaultNamespace(): string {
