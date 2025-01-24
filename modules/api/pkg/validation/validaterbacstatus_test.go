@@ -24,7 +24,7 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	test "k8s.io/client-go/testing"
 
-	"k8s.io/dashboard/api/pkg/errors"
+	"k8s.io/dashboard/errors"
 )
 
 func areErrorsEqual(err1, err2 error) bool {
@@ -68,7 +68,7 @@ func TestValidateRbacStatus(t *testing.T) {
 				return nil, errors.NewInvalid("test-error")
 			},
 			nil,
-			errors.NewInvalid("Couldn't get available api versions from server: test-error"),
+			errors.NewInvalid("couldn't get available api versions from server: test-error"),
 		},
 		{
 			"should disable rbacs when supported api version not enabled on the server",

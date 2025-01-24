@@ -2,8 +2,6 @@
 
 In this guide, we will find out how to create a new user using the Service Account mechanism of Kubernetes, grant this user admin permissions and login to Dashboard using a bearer token tied to this user.
 
-**IMPORTANT:** Make sure that you know what you are doing before proceeding. Granting admin privileges to Dashboard's Service Account might be a security risk.
-
 For each of the following snippets for `ServiceAccount` and `ClusterRoleBinding`, you should copy them to new manifest files like `dashboard-adminuser.yaml` and use `kubectl apply -f dashboard-adminuser.yaml` to create them.
 
 ## Creating a Service Account
@@ -69,10 +67,10 @@ metadata:
 type: kubernetes.io/service-account-token  
 ```
 
-After Secret is created, we can execute the following command to get the token which saved in the Secret:
+After Secret is created, we can execute the following command to get the token which is saved in the Secret:
 
 ```shell
-kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
+kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath="{.data.token}" | base64 -d
 ```
 
 Check [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#manually-create-a-long-lived-api-token-for-a-serviceaccount) for more information about long-lived API tokens for a ServiceAccount.
@@ -85,7 +83,9 @@ Now copy the token and paste it into the `Enter token` field on the login screen
 
 Click the `Sign in` button and that's it. You are now logged in as an admin.
 
-![Overview](../../images/dashboard-ui.png)
+**Note** Token login is ONLY allowed when the browser is accessing the UI over https.  If your networking path to the UI is via http, the login will fail with an invalid token error.
+
+![Overview](../../images/overview.png)
 
 ## Clean up and next steps
 

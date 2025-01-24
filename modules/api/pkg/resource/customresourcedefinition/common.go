@@ -19,17 +19,13 @@ import (
 
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/rest"
 
-	"k8s.io/dashboard/api/pkg/errors"
 	"k8s.io/dashboard/api/pkg/resource/common"
 	"k8s.io/dashboard/api/pkg/resource/customresourcedefinition/types"
 	crdv1 "k8s.io/dashboard/api/pkg/resource/customresourcedefinition/v1"
 	"k8s.io/dashboard/api/pkg/resource/dataselect"
+	"k8s.io/dashboard/errors"
 )
 
 var (
@@ -50,20 +46,6 @@ func GetExtensionsAPIVersion(client apiextensionsclientset.Interface) (string, e
 	}
 
 	return "", errors.NewNotFound("supported version for extensions api not found")
-}
-
-func GetExtensionsAPIRestClient(client apiextensionsclientset.Interface) (rest.Interface, error) {
-	version, err := GetExtensionsAPIVersion(client)
-	if err != nil {
-		return nil, err
-	}
-
-	switch version {
-	case v1:
-		return client.ApiextensionsV1().RESTClient(), nil
-	}
-
-	return nil, errors.NewNotFound(fmt.Sprintf("unsupported extensions api version: %s", version))
 }
 
 func GetCustomResourceDefinitionList(client apiextensionsclientset.Interface, dsQuery *dataselect.DataSelectQuery) (*types.CustomResourceDefinitionList, error) {
@@ -121,32 +103,4 @@ func GetCustomResourceObjectDetail(client apiextensionsclientset.Interface, name
 	}
 
 	return nil, errors.NewNotFound(fmt.Sprintf("unsupported extensions api versions: %s", version))
-}
-
-func NewRESTClient(config *rest.Config, group, version string) (*rest.RESTClient, error) {
-	groupVersion := schema.GroupVersion{
-		Group:   group,
-		Version: version,
-	}
-
-	scheme := runtime.NewScheme()
-	schemeBuilder := runtime.NewSchemeBuilder(
-		func(scheme *runtime.Scheme) error {
-			scheme.AddKnownTypes(
-				groupVersion,
-				&metav1.ListOptions{},
-				&metav1.DeleteOptions{},
-			)
-			return nil
-		})
-	if err := schemeBuilder.AddToScheme(scheme); err != nil {
-		return nil, err
-	}
-
-	config.GroupVersion = &groupVersion
-	config.APIPath = "/apis"
-	config.ContentType = runtime.ContentTypeJSON
-	config.NegotiatedSerializer = serializer.WithoutConversionCodecFactory{CodecFactory: serializer.NewCodecFactory(scheme)}
-
-	return rest.RESTClientFor(config)
 }
